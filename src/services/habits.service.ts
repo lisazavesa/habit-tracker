@@ -1,6 +1,6 @@
 import { Habit } from "../types/habit";
 
-let habits: Habit[] = [];
+export let habits: Habit[] = [];
 
 export const habitsService = {
         async getAll(): Promise<Habit[]> { 
@@ -14,10 +14,10 @@ export const habitsService = {
             description,
             isActive: true,
             createdAt: new Date().toISOString(),
-    };
+        };
 
-    habits.push(newHabit);
-    return newHabit;
+        habits.push(newHabit);
+        return newHabit;
     },
 
     async findById(id: number): Promise<Habit | undefined> {
