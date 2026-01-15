@@ -2,6 +2,8 @@ import { Router } from "express";
 import { habitsService } from "../services/habits.service";
 import { ApiResponse } from "../types/api";
 import { Habit } from "../types/habit";
+import { validateId } from "../middlewares/validateId";
+
 
 // import { habits } from "../services/habits.service";
 
@@ -56,8 +58,32 @@ habitsRouter.post("/", async (req, res, next) => {
     
 });
 
-habitsRouter.get("/:id", (req, res) => {
-    res.json({ message: "GET /habits/:id (todo)" });
+habitsRouter.get("/:id", validateId, async (req, res, next) => {
+    try {
+        const id = Number(req.params.id)
+
+        const habit = await habitsService.findById(id)
+
+        if (!habit) {
+            return res.status(404).json({
+                success: false,
+                data: null,
+                error: "привычка не найдена",
+            });
+        } else {
+            const response: ApiResponse<Habit> = {
+                success: true,
+                data: habit,
+                error: null,
+            }
+
+            res.json(response)
+        }
+
+        
+    } catch (err) {
+        next(err)
+    }
 });
 
 habitsRouter.patch("/:id", (req, res) => {
