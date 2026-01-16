@@ -227,10 +227,31 @@ habitsRouter.post(
     })
 )
 
-habitsRouter.get("/:id/logs", 
+habitsRouter.get(
+    "/:id/logs", 
     validateId, 
     asyncHandler(async (req, res) => {
+        const habitId = Number(req.params.id)
 
+        const habit = await habitsService.findById(habitId)
+
+        if (!habit) {
+            return res.status(404).json({
+                success: false,
+                data: null,
+                error: "привычка не найдена",
+            });
+        }
+
+        const log = await logsService.getByHabitId(habitId)
+
+        const response: ApiResponse<HabitLog[]> = {
+            success: true,
+            data: log,
+            error: null,
+        }
+
+        res.status(200).json(response)
     })
 )
 

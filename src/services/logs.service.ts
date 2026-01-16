@@ -30,4 +30,8 @@ export const logsService = {
         logs.push(newLog);
         return newLog;
     },
+
+    async getByHabitId(habitId: number): Promise<HabitLog[]> {
+        return logs.filter(l => l.habitId === habitId)
+    }
 };
