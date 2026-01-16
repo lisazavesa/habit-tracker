@@ -5,7 +5,7 @@ import { Habit } from "../types/habit";
 import { validateId } from "../middlewares/validateId";
 
 
-// import { habits } from "../services/habits.service";
+import { habits } from "../services/habits.service";
 
 
 export const habitsRouter = Router();
@@ -79,16 +79,83 @@ habitsRouter.get("/:id", validateId, async (req, res, next) => {
 
             res.json(response)
         }
-
-        
     } catch (err) {
         next(err)
     }
 });
 
-habitsRouter.patch("/:id", (req, res) => {
-    res.json({ message: "PATCH /habits/:id (todo)" });
+habitsRouter.patch("/:id", validateId, async (req, res, next) => {
+    try {
+        const id = Number(req.params.id)
+        const { title, description, isActive } = req.body as {
+            title?: unknown;
+            description?: unknown;
+            isActive?: unknown;
+        };
+
+        if (title !== undefined && typeof title !== 'string') {
+            return res.status(400).json({
+                success: false,
+                data: null,
+                error: "ошибка в заголовке",
+            });
+        }
+
+        if (description !== undefined && typeof description !== 'string') {
+            return res.status(400).json({
+                success: false,
+                data: null,
+                error: "ошибка в описании",
+            });
+        }
+
+        if (isActive !== undefined && typeof isActive !== 'boolean') {
+            return res.status(400).json({
+                success: false,
+                data: null,
+                error: "ошибка статуса привычки",
+            });
+        }
+
+        if (title === undefined && description === undefined && isActive === undefined) {
+            return res.status(400).json({
+                success: false,
+                data: null,
+                error: "нет данных для обновления",
+            });
+        }
+
+        const updateHabit = await habitsService.update(
+            id,
+            title as string | undefined,
+            description as string | undefined,
+            isActive as boolean | undefined
+        )
+
+        if (!updateHabit) {
+            return res.status(404).json({
+                success: false,
+                data: null,
+                error: "привычка не найдена",
+            });
+        }
+
+        const response: ApiResponse<Habit> = {
+                success: true,
+                data: updateHabit,
+                error: null,
+            }
+
+        res.json(response)
+
+    } catch (err) {
+        next(err)
+    }
 });
+
+
+
+
 
 habitsRouter.delete("/:id", (req, res) => {
     res.status(204).send();
