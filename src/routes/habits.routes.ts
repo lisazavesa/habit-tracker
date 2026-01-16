@@ -1,7 +1,9 @@
 import { Router } from "express";
 import { habitsService } from "../services/habits.service";
+import { logsService } from "../services/logs.service";
 import { ApiResponse } from "../types/api";
 import { Habit } from "../types/habit";
+import { HabitLog } from "../types/habitLog";
 import { validateId } from "../middlewares/validateId";
 import { asyncHandler } from "../utils/asyncHandler";
 
@@ -173,15 +175,69 @@ habitsRouter.delete(
 )
 
 // Logs
-habitsRouter.post("/:id/logs", (req, res) => {
-    res.json({ message: "POST /habits/:id/logs (todo)" });
-});
+habitsRouter.post(
+    "/:id/logs", 
+    validateId, 
+    asyncHandler(async (req, res) => {
 
-habitsRouter.get("/:id/logs", (req, res) => {
-    res.json({ message: "GET /habits/:id/logs (todo)" });
-});
+        const habitId = Number(req.params.id)
+
+        const habit = await habitsService.findById(habitId)
+        if (!habit) {
+            return res.status(404).json({
+                success: false,
+                data: null,
+                error: "привычка не найдена",
+            });
+        };
+
+        const { date, status } = req.body as { 
+            date?: unknown,
+            status?: unknown 
+        };
+
+        if (
+            (typeof date !== 'string') ||
+            (typeof status !== 'string')
+        ) {
+            return res.status(400).json({
+                success: false,
+                data: null,
+                error: "ошибка",
+            });
+        }
+
+        if (status !== 'done' && status !== "missed") {
+            return res.status(400).json({
+                success: false,
+                data: null,
+                error: "ошибка в статусе",
+            });
+        }
+
+        const habitLog = await logsService.upsert(habitId, date, status)
+
+        const response: ApiResponse<HabitLog> = {
+            success: true,
+            data: habitLog,
+            error: null,
+        }
+
+        res.status(200).json(response)
+    })
+)
+
+habitsRouter.get("/:id/logs", 
+    validateId, 
+    asyncHandler(async (req, res) => {
+
+    })
+)
 
 // Stats
-habitsRouter.get("/:id/stats", (req, res) => {
-    res.json({ message: "GET /habits/:id/stats (todo)" });
-});
+// habitsRouter.get("/:id/stats", 
+//     validateId, 
+//     asyncHandler(async (req, res) => {
+
+//     })
+// )

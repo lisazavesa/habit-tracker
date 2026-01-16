@@ -17,3 +17,21 @@ export function validateId(
 
     next();
 }
+
+// export function validateStatus(
+//     req: Request,
+//     res: Response,
+//     next: NextFunction
+// ) {
+
+//     const stat = habit.isActive
+//     if (typeof stat !== 'string') {
+//         return res.status(400).json({
+//             success: false,
+//             data: null,
+//             error: "неверный статус привычки",
+//         });
+//     }
+
+//     next()
+// }
