@@ -1,6 +1,7 @@
 import express from "express";
 import { habitsRouter } from "./routes/habits.routes";
-// import { errorHandler } from "./middlewares/errorHandler";
+import { errorHandler } from "./middlewares/errorHandler";
+// import { asyncHandler } from "./utils/asyncHandler";
 
 export const app = express();
 
@@ -15,4 +16,4 @@ app.get("/health", (req, res) => {
 });
 
 // error handler last
-// app.use(errorHandler);
+app.use(errorHandler);

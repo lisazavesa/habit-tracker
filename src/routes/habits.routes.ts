@@ -3,16 +3,17 @@ import { habitsService } from "../services/habits.service";
 import { ApiResponse } from "../types/api";
 import { Habit } from "../types/habit";
 import { validateId } from "../middlewares/validateId";
+import { asyncHandler } from "../utils/asyncHandler";
 
-
-import { habits } from "../services/habits.service";
+// import { habits } from "../services/habits.service";
 
 
 export const habitsRouter = Router();
 
 
-habitsRouter.get("/", async (req, res, next) => {
-    try {
+habitsRouter.get(
+    "/", 
+    asyncHandler(async (req, res) => {
         const habits = await habitsService.getAll()
 
         const response: ApiResponse<Habit[]> = {
@@ -22,15 +23,17 @@ habitsRouter.get("/", async (req, res, next) => {
         }
 
         res.json(response)
-        
-    } catch (err) {
-        next()
-    }
-});
+    })
+);
 
-habitsRouter.post("/", async (req, res, next) => {
-    try {
-        const { title, description } = req.body
+habitsRouter.post(
+    "/", 
+    asyncHandler(async (req, res) => {
+        const { title, description } = req.body as { 
+            title?: unknown; 
+            description?: unknown 
+        };
+
 
     if (!title || typeof title !== 'string') {
         return res.status(400).json({
@@ -52,14 +55,13 @@ habitsRouter.post("/", async (req, res, next) => {
         }
 
     res.status(201).json(response)
-    } catch (err) {
-        next(err)
-    }
-    
-});
+    })
+)
 
-habitsRouter.get("/:id", validateId, async (req, res, next) => {
-    try {
+habitsRouter.get(
+    "/:id", 
+    validateId, 
+    asyncHandler(async (req, res) => {
         const id = Number(req.params.id)
 
         const habit = await habitsService.findById(id)
@@ -79,13 +81,13 @@ habitsRouter.get("/:id", validateId, async (req, res, next) => {
 
             res.json(response)
         }
-    } catch (err) {
-        next(err)
-    }
-});
+    })
+);
 
-habitsRouter.patch("/:id", validateId, async (req, res, next) => {
-    try {
+habitsRouter.patch(
+    "/:id", 
+    validateId, 
+    asyncHandler(async (req, res) => {
         const id = Number(req.params.id)
         const { title, description, isActive } = req.body as {
             title?: unknown;
@@ -147,14 +149,13 @@ habitsRouter.patch("/:id", validateId, async (req, res, next) => {
             }
 
         res.json(response)
+    })
+)
 
-    } catch (err) {
-        next(err)
-    }
-});
-
-habitsRouter.delete("/:id", validateId, async (req, res, next) => {
-    try {
+habitsRouter.delete(
+    "/:id", 
+    validateId, 
+    asyncHandler(async (req, res) => {
         const id = Number(req.params.id)
 
         const deleted = await habitsService.delete(id)
@@ -168,11 +169,8 @@ habitsRouter.delete("/:id", validateId, async (req, res, next) => {
         }
 
         return res.status(204).send()
-
-    } catch (err) {
-        next(err)
-    }
-});
+    })
+)
 
 // Logs
 habitsRouter.post("/:id/logs", (req, res) => {
