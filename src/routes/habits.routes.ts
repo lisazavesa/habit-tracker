@@ -153,12 +153,25 @@ habitsRouter.patch("/:id", validateId, async (req, res, next) => {
     }
 });
 
+habitsRouter.delete("/:id", validateId, async (req, res, next) => {
+    try {
+        const id = Number(req.params.id)
 
+        const deleted = await habitsService.delete(id)
 
+        if (!deleted) {
+            return res.status(404).json({
+                success: false,
+                data: null,
+                error: "привычка не найдена",
+            });
+        }
 
+        return res.status(204).send()
 
-habitsRouter.delete("/:id", (req, res) => {
-    res.status(204).send();
+    } catch (err) {
+        next(err)
+    }
 });
 
 // Logs

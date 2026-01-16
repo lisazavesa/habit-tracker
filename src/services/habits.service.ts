@@ -48,4 +48,16 @@ export const habitsService = {
 
         return habit;
     },
+
+    async delete(id: number) {
+        const habit = habits.find(h => h.id === id);
+
+        if (!habit) {
+            return false
+        }
+
+        const index = habits.findIndex(h => h.id === habit.id)
+        habits.splice(index, 1)
+        return true
+    }
 };

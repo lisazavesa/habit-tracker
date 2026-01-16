@@ -11,7 +11,7 @@ export function validateId(
         return res.status(400).json({
             success: false,
             data: null,
-            error: "id must be a number",
+            error: "id должно быть цифрой!",
         });
     }
 
