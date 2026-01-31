@@ -31,7 +31,22 @@ export const logsService = {
         return newLog;
     },
 
-    async getByHabitId(habitId: number): Promise<HabitLog[]> {
-        return logs.filter(l => l.habitId === habitId)
+    async getByHabitId(
+        habitId: number,
+        from?: string,
+        to?: string
+    ): Promise<HabitLog[]> {
+
+        let result = logs.filter(l => l.habitId === habitId)
+        
+        if (from) {
+            result = result.filter(l => l.date >= from)
+        }
+
+        if (to) {
+            result = result.filter(l => l.date <= to)
+        }
+
+        return result
     }
 };

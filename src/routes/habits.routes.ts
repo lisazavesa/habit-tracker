@@ -1,9 +1,11 @@
 import { Router } from "express";
 import { habitsService } from "../services/habits.service";
 import { logsService } from "../services/logs.service";
+import { statsService } from "../services/stats.service";
 import { ApiResponse } from "../types/api";
 import { Habit } from "../types/habit";
 import { HabitLog } from "../types/habitLog";
+import { HabitStats } from "../types/stats";
 import { validateId } from "../middlewares/validateId";
 import { asyncHandler } from "../utils/asyncHandler";
 
@@ -243,22 +245,83 @@ habitsRouter.get(
             });
         }
 
-        const log = await logsService.getByHabitId(habitId)
+        const { from, to } = req.query;
+
+        if (from !== undefined && typeof from !== "string") {
+            return res.status(400).json({
+                success: false,
+                data: null,
+                error: "ошибка",
+            });
+        }
+
+        if (to !== undefined && typeof to !== "string") {
+            return res.status(400).json({
+                success: false,
+                data: null,
+                error: "ошибка",
+            });
+        }
+
+        const logs = await logsService.getByHabitId(
+            habitId,
+            from as string | undefined,
+            to as string | undefined
+        );
 
         const response: ApiResponse<HabitLog[]> = {
             success: true,
-            data: log,
+            data: logs,
             error: null,
         }
 
-        res.status(200).json(response)
+        res.json(response)
     })
 )
 
 // Stats
-// habitsRouter.get("/:id/stats", 
-//     validateId, 
-//     asyncHandler(async (req, res) => {
 
-//     })
-// )
+habitsRouter.get("/:id/stats", 
+    validateId, 
+    asyncHandler(async (req, res) => {
+        const habitId = Number(req.params.id)
+
+        const habit = await habitsService.findById(habitId)
+
+        if (!habit) {
+            return res.status(404).json({
+                success: false,
+                data: null,
+                error: "привычка не найдена",
+            });
+        }
+
+        const { from, to } = req.query;
+
+        if (!from || typeof from !== "string"){
+            return res.status(400).json({
+                success: false,
+                data: null,
+                error: "from обязателен",
+            });
+        }
+
+        if (!to || typeof to !== "string") {
+            return res.status(400).json({
+                success: false,
+                data: null,
+                error: "to обязателен",
+            });
+        }
+
+        const stats = await statsService.getHabitStats(habitId, from, to)
+
+        const response: ApiResponse<HabitStats> = {
+            success: true,
+            data: stats,
+            error: null,
+        }
+
+        res.json(response)
+    })
+)
