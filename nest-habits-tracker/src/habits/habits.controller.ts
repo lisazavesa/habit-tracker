@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, ParseIntPipe } from '@nestjs/common';
 import { HabitsService } from './habits.service';
 import { Habit } from "./types/habit.type";
 import { CreateHabitDto } from "./dto/create-habit.dto";
@@ -35,6 +35,25 @@ export class HabitsController {
         }
 
         const habit = this.habitsService.create(dto.title, dto.description)
+
+        return {
+            success: true,
+            data: habit,
+            error: null,
+        }
+    }
+
+    @Get(':id')
+    findById(@Param('id', ParseIntPipe) id: number): ApiResponse<Habit> {
+        const habit = this.habitsService.findById(id)
+
+        if (!habit) {
+            return {
+                success: false,
+                data: null,
+                error: 'habit not found',
+            }
+        }
 
         return {
             success: true,
