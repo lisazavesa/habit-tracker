@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, ParseIntPipe } from '@nestjs/common';
 import { HabitsService } from './habits.service';
 import { Habit } from "./types/habit.type";
 import { CreateHabitDto } from "./dto/create-habit.dto";
+import { UpdateHabitDto } from "./dto/update-habit.dto";
 
 type ApiResponse<T> = {
         success: boolean,
@@ -14,7 +15,7 @@ export class HabitsController {
     constructor(private readonly habitsService: HabitsService) {}
 
     @Get()
-    findAll(): ApiResponse<Habit[]> {
+    findAllHabits(): ApiResponse<Habit[]> {
         const habits = this.habitsService.getAll()
 
         return {
@@ -44,7 +45,7 @@ export class HabitsController {
     }
 
     @Get(':id')
-    findById(@Param('id', ParseIntPipe) id: number): ApiResponse<Habit> {
+    findHabitById(@Param('id', ParseIntPipe) id: number): ApiResponse<Habit> {
         const habit = this.habitsService.findById(id)
 
         if (!habit) {
@@ -60,6 +61,80 @@ export class HabitsController {
             data: habit,
             error: null,
         }
+    }
+
+    @Patch(':id')
+    updateHabit(
+        @Param('id', ParseIntPipe) id: number,
+        @Body() dto: UpdateHabitDto,
+    ): ApiResponse<Habit> {
+        if (dto.title !== undefined && typeof dto.title !== 'string') {
+            return {
+                success: false,
+                data: null,
+                error: 'title error',
+            };
+        }
+
+        if (dto.description !== undefined && typeof dto.description !== 'string') {
+            return {
+                success: false,
+                data: null,
+                error: 'description error',
+            };
+        }
+
+        if (dto.isActive !== undefined && typeof dto.isActive !== 'boolean') {
+            return {
+                success: false,
+                data: null,
+                error: "isActive error",
+            };
+        }
+
+        if (dto.title === undefined && dto.description === undefined && dto.isActive === undefined) {
+            return {
+                success: false,
+                data: null,
+                error: "no data to update",
+            };
+        }
+
+        const updateHabit = this.habitsService.update(id, dto)
+
+        if (!updateHabit) {
+            return {
+                success: false,
+                data: null,
+                error: "habit not found",
+            };
+        }
+
+        return {
+            success: true,
+            data: updateHabit,
+            error: null,
+        }
+    }
+
+    @Delete(':id')
+    deleteHabit(@Param('id', ParseIntPipe) id: number): ApiResponse<null> {
+        const deleted = this.habitsService.delete(id)
+
+        if(!deleted) {
+            return {
+                success: false,
+                data: null,
+                error: "failed delete",
+            };
+        }
+
+        return {
+            success: true,
+            data: null,
+            error: null,
+        }
+
     }
 }
 
