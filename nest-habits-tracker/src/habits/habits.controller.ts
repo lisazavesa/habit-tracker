@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param, ParseIntPipe } from '@nestjs/common';
 import { HabitsService } from './habits.service';
-import { Habit } from "./types/habit.type";
+import { Habit } from '@prisma/client';
 import { CreateHabitDto } from "./dto/create-habit.dto";
 import { UpdateHabitDto } from "./dto/update-habit.dto";
 
@@ -15,8 +15,8 @@ export class HabitsController {
     constructor(private readonly habitsService: HabitsService) {}
 
     @Get()
-    findAllHabits(): ApiResponse<Habit[]> {
-        const habits = this.habitsService.getAll()
+    async findAllHabits(): Promise<ApiResponse<Habit[]>> {
+        const habits = await this.habitsService.getAll()
 
         return {
             success: true,
@@ -26,7 +26,7 @@ export class HabitsController {
     }
 
     @Post()
-    createHabit(@Body() dto: CreateHabitDto): ApiResponse<Habit>  {
+    async createHabit(@Body() dto: CreateHabitDto): Promise<ApiResponse<Habit>>  {
         if (!dto.title || typeof dto.title !== 'string') {
             return {
                 success: false,
@@ -35,7 +35,7 @@ export class HabitsController {
             }
         }
 
-        const habit = this.habitsService.create(dto.title, dto.description)
+        const habit = await this.habitsService.create(dto.title, dto.description)
 
         return {
             success: true,
@@ -45,8 +45,8 @@ export class HabitsController {
     }
 
     @Get(':id')
-    findHabitById(@Param('id', ParseIntPipe) id: number): ApiResponse<Habit> {
-        const habit = this.habitsService.findById(id)
+    async findHabitById(@Param('id', ParseIntPipe) id: number): Promise<ApiResponse<Habit>> {
+        const habit = await this.habitsService.findById(id)
 
         if (!habit) {
             return {
@@ -64,10 +64,10 @@ export class HabitsController {
     }
 
     @Patch(':id')
-    updateHabit(
+    async updateHabit(
         @Param('id', ParseIntPipe) id: number,
         @Body() dto: UpdateHabitDto,
-    ): ApiResponse<Habit> {
+    ): Promise<ApiResponse<Habit>> {
         if (dto.title !== undefined && typeof dto.title !== 'string') {
             return {
                 success: false,
@@ -100,7 +100,7 @@ export class HabitsController {
             };
         }
 
-        const updateHabit = this.habitsService.update(id, dto)
+        const updateHabit = await this.habitsService.update(id, dto)
 
         if (!updateHabit) {
             return {
@@ -118,8 +118,8 @@ export class HabitsController {
     }
 
     @Delete(':id')
-    deleteHabit(@Param('id', ParseIntPipe) id: number): ApiResponse<null> {
-        const deleted = this.habitsService.delete(id)
+    async deleteHabit(@Param('id', ParseIntPipe) id: number): Promise<ApiResponse<null>> {
+        const deleted = await this.habitsService.delete(id)
 
         if(!deleted) {
             return {

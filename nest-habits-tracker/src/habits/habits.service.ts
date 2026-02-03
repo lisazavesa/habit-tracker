@@ -1,63 +1,44 @@
 import { Injectable } from '@nestjs/common';
-import { Habit } from "../habits/types/habit.type";
+import { PrismaService } from '../prisma/prisma.service';
+import { Habit, Prisma } from '@prisma/client';
+
 
 @Injectable()
 export class HabitsService {
-    private habits: Habit[] = [];
+    constructor(private readonly prisma: PrismaService) {}
 
-    getAll(): Habit[] {
-        return this.habits
+    getAll(): Promise<Habit[]> {
+        return this.prisma.habit.findMany({
+            orderBy: { createdAt: 'desc' },
+        })
     }
 
-    create(title: string, description?: string): Habit {
-        const newHabit: Habit = {
-            id: Date.now(),
-            title,
-            description,
-            isActive: true,
-            createdAt: new Date().toISOString(),
-        }
-
-        this.habits.push(newHabit)
-        return newHabit
+    create(title: string, description?: string): Promise<Habit> {
+        return this.prisma.habit.create({
+            data: { title, description },
+        });
     }
 
-    findById(id: number): Habit | undefined {
-        return this.habits.find(h => h.id ===  id)
+    findById(id: number): Promise<Habit | null> {
+        return this.prisma.habit.findUnique({
+            where: { id },
+        });
     }
 
-    update(
-        id: number, 
-        patch: { title?: string; description?: string; isActive?: boolean }
-    ): Habit | undefined {
-        const habit = this.habits.find(h => h.id ===  id)
-
-        if (!habit) {
-            return
-        }
-
-        if (patch.title !== undefined) {
-            habit.title = patch.title
-        }
-        if (patch.description !== undefined) {
-            habit.description = patch.description 
-        }
-        if (patch.isActive !== undefined) {
-            habit.isActive = patch.isActive 
-        }
-
-        return habit;
+    update(id: number, patch: Prisma.HabitUpdateInput): Promise<Habit> {
+    return this.prisma.habit.update({
+        where: { id },
+        data: patch,
+        });
     }
 
-    delete(id: number): boolean  {
-        const habit = this.habits.find(h => h.id ===  id)
-        
-        if (!habit) {
-            return false
+    async delete(id: number): Promise<boolean> {
+    // delete тоже кидает ошибку, если записи нет
+        try {
+            await this.prisma.habit.delete({ where: { id } });
+            return true;
+        } catch {
+            return false;
         }
-
-        const index = this.habits.findIndex(h => h.id === habit.id)
-        this.habits.splice(index, 1)
-        return true
     }
 }
