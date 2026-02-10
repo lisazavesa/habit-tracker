@@ -1,8 +1,10 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param, ParseIntPipe } from '@nestjs/common';
 import { HabitsService } from './habits.service';
-import { Habit } from '@prisma/client';
+import { HabitLogsService } from './habits-logs/habits-logs.servise';
+import { Habit, HabitLog } from '@prisma/client';
 import { CreateHabitDto } from "./dto/create-habit.dto";
 import { UpdateHabitDto } from "./dto/update-habit.dto";
+import { UpsertHabitLogDto } from "./dto/upsert-habit-log.dto";
 
 type ApiResponse<T> = {
         success: boolean,
@@ -12,7 +14,10 @@ type ApiResponse<T> = {
 
 @Controller('habits')
 export class HabitsController {
-    constructor(private readonly habitsService: HabitsService) {}
+    constructor(
+        private readonly habitsService: HabitsService,
+        private readonly logsService: HabitLogsService,
+    ) {}
 
     @Get()
     async findAllHabits(): Promise<ApiResponse<Habit[]>> {
@@ -136,6 +141,32 @@ export class HabitsController {
         }
 
     }
+
+    @Post(':id/logs')
+    async addHabitLog(
+        @Param('id', ParseIntPipe) habitId: number,
+        @Body() dto: UpsertHabitLogDto,
+    ): Promise<ApiResponse<HabitLog>> {
+        const habit = await this.habitsService.findById(habitId)
+
+        if (!habit) {
+            return {
+                success: false,
+                data: null,
+                error: "habit not found",
+            };
+        }
+
+        const log = await this.logsService.upsert(habitId, dto.date, dto.status)
+
+        return {
+            success: true,
+            data: log,
+            error: null,
+        }
+    }
 }
+
+
 
 

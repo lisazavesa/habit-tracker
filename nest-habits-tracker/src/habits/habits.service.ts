@@ -33,7 +33,6 @@ export class HabitsService {
     }
 
     async delete(id: number): Promise<boolean> {
-    // delete тоже кидает ошибку, если записи нет
         try {
             await this.prisma.habit.delete({ where: { id } });
             return true;

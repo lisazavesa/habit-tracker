@@ -13,4 +13,26 @@ model Habit {
   description String?
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
+
+  logs HabitLog[]
+
+  @@map("habits")
+}
+
+enum HabitStatus {
+  done
+  missed
+}
+
+model HabitLog {
+  id Int @id @default(autoincrement())
+  habitId Int
+  date String
+  status HabitStatus
+  createdAt   DateTime @default(now())
+
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  @@unique([habitId, date])
+  @@map("habit_logs")
 }
