@@ -7,13 +7,26 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  habits Habit[]
+
+  @@map("users")
+}
+
 model Habit {
   id          Int      @id @default(autoincrement())
+  userId      Int
   title       String
   description String?
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
 
+  user User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   logs HabitLog[]
 
   @@map("habits")
@@ -25,11 +38,11 @@ enum HabitStatus {
 }
 
 model HabitLog {
-  id Int @id @default(autoincrement())
-  habitId Int
-  date String
-  status HabitStatus
-  createdAt   DateTime @default(now())
+  id        Int         @id @default(autoincrement())
+  habitId   Int
+  date      String
+  status    HabitStatus
+  createdAt DateTime    @default(now())
 
   habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
 
