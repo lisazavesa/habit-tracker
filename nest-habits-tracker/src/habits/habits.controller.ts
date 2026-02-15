@@ -32,13 +32,6 @@ export class HabitsController {
 
     @Post()
     async createHabit(@Body() dto: CreateHabitDto): Promise<ApiResponse<Habit>>  {
-        if (!dto.title || typeof dto.title !== 'string') {
-            return {
-                success: false,
-                data: null,
-                error: 'title is required',
-            }
-        }
 
         const habit = await this.habitsService.create(dto.title, dto.description)
 
@@ -73,37 +66,6 @@ export class HabitsController {
         @Param('id', ParseIntPipe) id: number,
         @Body() dto: UpdateHabitDto,
     ): Promise<ApiResponse<Habit>> {
-        if (dto.title !== undefined && typeof dto.title !== 'string') {
-            return {
-                success: false,
-                data: null,
-                error: 'title error',
-            };
-        }
-
-        if (dto.description !== undefined && typeof dto.description !== 'string') {
-            return {
-                success: false,
-                data: null,
-                error: 'description error',
-            };
-        }
-
-        if (dto.isActive !== undefined && typeof dto.isActive !== 'boolean') {
-            return {
-                success: false,
-                data: null,
-                error: "isActive error",
-            };
-        }
-
-        if (dto.title === undefined && dto.description === undefined && dto.isActive === undefined) {
-            return {
-                success: false,
-                data: null,
-                error: "no data to update",
-            };
-        }
 
         const updateHabit = await this.habitsService.update(id, dto)
 
@@ -182,7 +144,7 @@ export class HabitsController {
             };
         }
 
-        if (from !== undefined && typeof from !== "string") {
+        if (from !== undefined) {
             return {
                 success: false,
                 data: null,
@@ -190,7 +152,7 @@ export class HabitsController {
             };
         }
 
-        if (to !== undefined && typeof to !== "string") {
+        if (to !== undefined) {
             return {
                 success: false,
                 data: null,
