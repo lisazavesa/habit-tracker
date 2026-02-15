@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { HabitsService } from './habits.service';
 import { HabitLogsService } from './habits-logs/habits-logs.servise';
 import { Habit, HabitLog } from '@prisma/client';
@@ -162,6 +162,47 @@ export class HabitsController {
         return {
             success: true,
             data: log,
+            error: null,
+        }
+    }
+
+    @Get(':id/logs')
+    async getHabitLogs(
+        @Param('id', ParseIntPipe) habitId: number,
+        @Query('from') from?: string,
+        @Query('to') to?: string,
+    ): Promise<ApiResponse<HabitLog[]>> {
+        const habit = await this.habitsService.findById(habitId)
+
+        if (!habit) {
+            return {
+                success: false,
+                data: null,
+                error: "habit not found",
+            };
+        }
+
+        if (from !== undefined && typeof from !== "string") {
+            return {
+                success: false,
+                data: null,
+                error: "from - error",
+            };
+        }
+
+        if (to !== undefined && typeof to !== "string") {
+            return {
+                success: false,
+                data: null,
+                error: "to - error",
+            };
+        }
+
+        const logs = await this.logsService.getByHabitId(habitId, from, to)
+
+        return {
+            success: true,
+            data: logs,
             error: null,
         }
     }

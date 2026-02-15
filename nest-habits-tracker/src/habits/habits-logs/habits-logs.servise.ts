@@ -18,4 +18,30 @@ export class HabitLogsService {
                 create: { habitId, date, status }
             })
         }
+
+    getByHabitId(
+        habitId: number,
+        from?: string | undefined,
+        to?: string | undefined
+    ): Promise<HabitLog[]> {
+
+        const where: any = { habitId }
+
+        if (from || to) {
+            where.date = {}
+        }
+
+        if (from) {
+            where.date.gte = from;
+        }
+
+        if (to) {
+            where.date.lte = to;
+        }
+
+        return this.prisma.habitLog.findMany({
+            where,
+            orderBy: { date: 'asc' }
+        });
+    }
 }
