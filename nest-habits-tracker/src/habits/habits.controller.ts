@@ -19,9 +19,9 @@ export class HabitsController {
         private readonly logsService: HabitLogsService,
     ) {}
 
-    @Get()
-    async findAllHabits(): Promise<ApiResponse<Habit[]>> {
-        const habits = await this.habitsService.getAll()
+    @Get(":userId")
+    async findAllHabits(@Param('userId', ParseIntPipe) userId: number): Promise<ApiResponse<Habit[]>> {
+        const habits = await this.habitsService.getAll(userId)
 
         return {
             success: true,
@@ -30,8 +30,11 @@ export class HabitsController {
         }
     }
 
-    @Post()
-    async createHabit(@Body() dto: CreateHabitDto, userId: number): Promise<ApiResponse<Habit>>  {
+    @Post(":userId")
+    async createHabit(
+        @Body() dto: CreateHabitDto,
+        @Param('userId', ParseIntPipe) userId: number
+            ): Promise<ApiResponse<Habit>>  {
 
         const habit = await this.habitsService.create(dto.title, userId, dto.description)
 
@@ -42,7 +45,7 @@ export class HabitsController {
         }
     }
 
-    @Get(':id')
+    @Get(':userId/:id')
     async findHabitById(@Param('id', ParseIntPipe) id: number): Promise<ApiResponse<Habit>> {
         const habit = await this.habitsService.findById(id)
 
@@ -61,7 +64,7 @@ export class HabitsController {
         }
     }
 
-    @Patch(':id')
+    @Patch(':userId/:id')
     async updateHabit(
         @Param('id', ParseIntPipe) id: number,
         @Body() dto: UpdateHabitDto,
@@ -84,7 +87,7 @@ export class HabitsController {
         }
     }
 
-    @Delete(':id')
+    @Delete(':userId/:id')
     async deleteHabit(@Param('id', ParseIntPipe) id: number): Promise<ApiResponse<null>> {
         const deleted = await this.habitsService.delete(id)
 
@@ -104,7 +107,7 @@ export class HabitsController {
 
     }
 
-    @Post(':id/logs')
+    @Post(':userId/:id/logs')
     async addHabitLog(
         @Param('id', ParseIntPipe) habitId: number,
         @Body() dto: UpsertHabitLogDto,
@@ -128,7 +131,7 @@ export class HabitsController {
         }
     }
 
-    @Get(':id/logs')
+    @Get(':userId/:id/logs')
     async getHabitLogs(
         @Param('id', ParseIntPipe) habitId: number,
         @Query('from') from?: string,

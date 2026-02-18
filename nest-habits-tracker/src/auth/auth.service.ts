@@ -1,6 +1,6 @@
 import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { User } from '@prisma/client';
+// import { PrismaService } from '../prisma/prisma.service';
+// import { User } from '@prisma/client';
 import * as bcrypt from "bcrypt";
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
@@ -31,7 +31,7 @@ export class AuthService {
 
         const accessToken = this.jwtService.sign(payload)
 
-        return { accessToken }
+        return { accessToken, userId: user.id }
     }
 
     async login(email: string, password: string) {

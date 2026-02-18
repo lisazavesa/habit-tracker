@@ -7,8 +7,9 @@ import { Habit, Prisma } from '@prisma/client';
 export class HabitsService {
     constructor(private readonly prisma: PrismaService) {}
 
-    getAll(): Promise<Habit[]> {
+    getAll(userId: number): Promise<Habit[]> {
         return this.prisma.habit.findMany({
+            where: { userId },
             orderBy: { createdAt: 'desc' },
         })
     }
