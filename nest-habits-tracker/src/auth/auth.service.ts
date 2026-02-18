@@ -3,13 +3,17 @@ import { PrismaService } from '../prisma/prisma.service';
 import { User } from '@prisma/client';
 import * as bcrypt from "bcrypt";
 import { UsersService } from '../users/users.service';
+import { JwtService } from '@nestjs/jwt';
 
 
 @Injectable()
 export class AuthService {
-    constructor(private readonly usersService: UsersService) {}
+    constructor(
+        private readonly usersService: UsersService,
+        private readonly jwtService: JwtService
+    ) {}
     
-    async register(email: string, password: string): Promise<User> {
+    async register(email: string, password: string) {
         const existing = await this.usersService.findByEmail(email)
 
         if (existing) {
@@ -20,10 +24,17 @@ export class AuthService {
 
         const user = await this.usersService.create(email, passwordHash)
 
-        return user
+        const payload = { 
+            sub: user.id, 
+            email: user.email 
+        }
+
+        const accessToken = this.jwtService.sign(payload)
+
+        return { accessToken }
     }
 
-    async login(email: string, password: string): Promise<User> {
+    async login(email: string, password: string) {
         const user = await this.usersService.findByEmail(email)
 
         if (!user) {
@@ -36,7 +47,14 @@ export class AuthService {
             throw new UnauthorizedException('invalid credentials')
         }
         
-        return user
+        const payload = { 
+            sub: user.id, 
+            email: user.email 
+        }
+
+        const accessToken = this.jwtService.sign(payload)
+
+        return { accessToken }
 
         }
 }

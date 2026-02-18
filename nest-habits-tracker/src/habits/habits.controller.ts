@@ -31,9 +31,9 @@ export class HabitsController {
     }
 
     @Post()
-    async createHabit(@Body() dto: CreateHabitDto): Promise<ApiResponse<Habit>>  {
+    async createHabit(@Body() dto: CreateHabitDto, userId: number): Promise<ApiResponse<Habit>>  {
 
-        const habit = await this.habitsService.create(dto.title, dto.description)
+        const habit = await this.habitsService.create(dto.title, userId, dto.description)
 
         return {
             success: true,

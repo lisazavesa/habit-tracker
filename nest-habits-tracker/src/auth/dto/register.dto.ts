@@ -10,18 +10,3 @@ export class RegisterDto {
     @MinLength(8)
     password: string
 }
-// export class UpdateHabitDto {
-//     @IsString()
-//     @IsOptional()
-//     @MaxLength(100)
-//     title?: string;
-
-//     @IsString()
-//     @IsOptional()
-//     @MaxLength(500)
-//     description?: string;
-
-//     @IsBoolean()
-//     @IsOptional()
-//     isActive?: boolean
-// }

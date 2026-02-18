@@ -13,9 +13,15 @@ export class HabitsService {
         })
     }
 
-    create(title: string, description?: string): Promise<Habit> {
+    create(title: string, userId: number, description?: string): Promise<Habit> {
         return this.prisma.habit.create({
-            data: { title, description },
+            data: { 
+                title, 
+                description,
+                user: {
+                    connect: { id: userId },
+                },
+            },
         });
     }
 
