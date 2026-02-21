@@ -26,25 +26,51 @@ export class HabitsService {
         });
     }
 
-    findById(id: number): Promise<Habit | null> {
+    findById(id: number, userId: number): Promise<Habit | null> {
         return this.prisma.habit.findUnique({
-            where: { id },
+            where: { 
+                id,
+                userId,
+            },
         });
     }
 
-    update(id: number, patch: Prisma.HabitUpdateInput): Promise<Habit> {
+    async update(
+        id: number, 
+        userId: number, 
+        patch: Prisma.HabitUpdateInput
+    ): Promise<Habit | null> {
+        const habit = await this.prisma.habit.findFirst({
+            where: { 
+                id,
+                userId,
+            }
+        })
+
+        if (!habit) {
+            return null;
+        }
+
     return this.prisma.habit.update({
         where: { id },
         data: patch,
         });
     }
 
-    async delete(id: number): Promise<boolean> {
-        try {
-            await this.prisma.habit.delete({ where: { id } });
-            return true;
-        } catch {
+    async delete(id: number, userId: number): Promise<boolean> {
+        const habit = await this.prisma.habit.findFirst({
+            where: { 
+                id,
+                userId,
+            }
+        })
+
+        if (!habit) {
             return false;
         }
+
+        await this.prisma.habit.delete({ where: { id } });
+        return true;
+        
     }
 }

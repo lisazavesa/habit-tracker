@@ -1,10 +1,17 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, ParseIntPipe, Query } from '@nestjs/common';
+import { 
+    Controller, 
+    Get, Post, Patch, Delete, 
+    Body, Param, ParseIntPipe, Query, Request, UseGuards
+} from '@nestjs/common';
+
 import { HabitsService } from './habits.service';
 import { HabitLogsService } from './habits-logs/habits-logs.servise';
 import { Habit, HabitLog } from '@prisma/client';
 import { CreateHabitDto } from "./dto/create-habit.dto";
 import { UpdateHabitDto } from "./dto/update-habit.dto";
 import { UpsertHabitLogDto } from "./dto/upsert-habit-log.dto";
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+
 
 type ApiResponse<T> = {
         success: boolean,
@@ -12,6 +19,9 @@ type ApiResponse<T> = {
         error: string | null
     }
 
+
+
+@UseGuards(JwtAuthGuard)
 @Controller('habits')
 export class HabitsController {
     constructor(
@@ -19,8 +29,9 @@ export class HabitsController {
         private readonly logsService: HabitLogsService,
     ) {}
 
-    @Get(":userId")
-    async findAllHabits(@Param('userId', ParseIntPipe) userId: number): Promise<ApiResponse<Habit[]>> {
+    @Get()
+    async findAllHabits(@Request() req): Promise<ApiResponse<Habit[]>> {
+        const userId = req.user.userId
         const habits = await this.habitsService.getAll(userId)
 
         return {
@@ -30,11 +41,11 @@ export class HabitsController {
         }
     }
 
-    @Post(":userId")
+    @Post()
     async createHabit(
-        @Body() dto: CreateHabitDto,
-        @Param('userId', ParseIntPipe) userId: number
-            ): Promise<ApiResponse<Habit>>  {
+        @Request() req,
+        @Body() dto: CreateHabitDto): Promise<ApiResponse<Habit>> {
+        const userId = req.user.userId
 
         const habit = await this.habitsService.create(dto.title, userId, dto.description)
 
@@ -45,9 +56,13 @@ export class HabitsController {
         }
     }
 
-    @Get(':userId/:id')
-    async findHabitById(@Param('id', ParseIntPipe) id: number): Promise<ApiResponse<Habit>> {
-        const habit = await this.habitsService.findById(id)
+    @Get('id')
+    async findHabitById(
+        @Param('id', ParseIntPipe) id: number,
+        @Request() req,
+    ): Promise<ApiResponse<Habit>> {
+        const userId = req.user.userId
+        const habit = await this.habitsService.findById(id, userId)
 
         if (!habit) {
             return {
@@ -64,13 +79,15 @@ export class HabitsController {
         }
     }
 
-    @Patch(':userId/:id')
+    @Patch(':id')
     async updateHabit(
+        @Request() req,
         @Param('id', ParseIntPipe) id: number,
         @Body() dto: UpdateHabitDto,
     ): Promise<ApiResponse<Habit>> {
+        const userId = req.user.userId
 
-        const updateHabit = await this.habitsService.update(id, dto)
+        const updateHabit = await this.habitsService.update(id, userId, dto)
 
         if (!updateHabit) {
             return {
@@ -87,9 +104,13 @@ export class HabitsController {
         }
     }
 
-    @Delete(':userId/:id')
-    async deleteHabit(@Param('id', ParseIntPipe) id: number): Promise<ApiResponse<null>> {
-        const deleted = await this.habitsService.delete(id)
+    @Delete(':id')
+    async deleteHabit(
+        @Param('id', ParseIntPipe) id: number,
+        @Request() req
+    ): Promise<ApiResponse<null>> {
+        const userId = req.user.userId
+        const deleted = await this.habitsService.delete(id, userId)
 
         if(!deleted) {
             return {
@@ -107,12 +128,14 @@ export class HabitsController {
 
     }
 
-    @Post(':userId/:id/logs')
+    @Post(':id/logs')
     async addHabitLog(
+        @Request() req,
         @Param('id', ParseIntPipe) habitId: number,
         @Body() dto: UpsertHabitLogDto,
     ): Promise<ApiResponse<HabitLog>> {
-        const habit = await this.habitsService.findById(habitId)
+        const userId = req.user.userId
+        const habit = await this.habitsService.findById(habitId, userId)
 
         if (!habit) {
             return {
@@ -131,13 +154,15 @@ export class HabitsController {
         }
     }
 
-    @Get(':userId/:id/logs')
+    @Get(':id/logs')
     async getHabitLogs(
+        @Request() req,
         @Param('id', ParseIntPipe) habitId: number,
         @Query('from') from?: string,
         @Query('to') to?: string,
     ): Promise<ApiResponse<HabitLog[]>> {
-        const habit = await this.habitsService.findById(habitId)
+        const userId = req.user.userId
+        const habit = await this.habitsService.findById(habitId, userId)
 
         if (!habit) {
             return {
