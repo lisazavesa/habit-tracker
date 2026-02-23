@@ -43,7 +43,7 @@ export const AppHeader = () => {
       >
         <Group>
           <Text fw={700} size="xl">
-            📊 Habit Tracker
+            Habit Tracker
           </Text>
         </Group>
 

@@ -2,11 +2,12 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { MantineProvider } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
 import { Provider as ReduxProvider } from "react-redux";
-import { store } from "@/store";
 import { useAppSelector } from "@/hooks/redux";
+import { store } from "@/store";
 import { HomePage } from "@/pages/HomePage";
 import { AuthPage } from "@/components/AuthPage";
 import { SettingsPage } from "@/pages/SettingsPage";
+import { theme } from "./theme";
 
 const AppRoutes = () => {
   const { user, token } = useAppSelector((state) => state.auth);
@@ -34,7 +35,7 @@ const AppRoutes = () => {
 export const App = () => {
   return (
     <ReduxProvider store={store}>
-      <MantineProvider defaultColorScheme="light">
+      <MantineProvider theme={theme}>
         <Notifications />
         <BrowserRouter>
           <AppRoutes />

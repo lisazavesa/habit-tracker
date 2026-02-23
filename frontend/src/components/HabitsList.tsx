@@ -11,6 +11,7 @@ import {
   Center,
   Loader,
   Modal,
+  Flex,
 } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import "dayjs/locale/ru";
@@ -20,6 +21,7 @@ import {
   IconPlus,
   IconCheckupList,
   IconHistory,
+  IconCirclePlus,
 } from "@tabler/icons-react";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux";
 import { fetchHabits, deleteHabit, upsertHabitLog } from "@/store/habitsSlice";
@@ -74,8 +76,8 @@ export const HabitsList = ({
   }
 
   return (
-    <Container size="xl" py="xl">
-      <Group justify="space-between" mb="xl">
+    <Container size="xl" py="lg">
+      <Group justify="space-between" mb="lg">
         <Group>
           <IconCheckupList size={32} />
           <Text size="xl" fw={700}>
@@ -113,17 +115,17 @@ export const HabitsList = ({
                   <Text fw={700} size="lg">
                     {habit.title}
                   </Text>
-                  {habit.description && (
-                    <Text size="sm" c="dimmed">
-                      {habit.description}
-                    </Text>
-                  )}
+
+                  <Text h={20} size="sm" c="dimmed">
+                    {habit.description}
+                  </Text>
                 </Stack>
               </Card.Section>
 
-              <Group grow pb="sm">
+              <Group grow py="sm">
                 <Button
                   variant="light"
+                  leftSection={<IconCirclePlus size={18} />}
                   onClick={() => {
                     setSelectedHabit(habit);
                     setSelectedDate(new Date());
@@ -136,7 +138,7 @@ export const HabitsList = ({
                 <Button
                   variant="light"
                   onClick={() => handleShowLogs(habit)}
-                  leftSection={<IconHistory size={14} />}
+                  leftSection={<IconHistory size={18} />}
                   fullWidth
                 >
                   Логи
@@ -144,22 +146,32 @@ export const HabitsList = ({
               </Group>
 
               <Card.Section withBorder inheritPadding py="sm">
-                <Group justify="flex-end">
-                  <ActionIcon
-                    variant="light"
-                    color="blue"
-                    onClick={() => onEditHabit?.(habit)}
-                  >
-                    <IconEdit size={14} />
-                  </ActionIcon>
-                  <ActionIcon
-                    variant="light"
-                    color="red"
-                    onClick={() => handleDeleteHabit(habit.id)}
-                  >
-                    <IconTrash size={14} />
-                  </ActionIcon>
-                </Group>
+                <Flex justify="space-between" align="center">
+                  <Text size="sm" c="dimmed">
+                    {new Date(habit.createdAt).toLocaleDateString("ru-RU", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </Text>
+
+                  <Group justify="flex-end">
+                    <ActionIcon
+                      variant="light"
+                      color="blue"
+                      onClick={() => onEditHabit?.(habit)}
+                    >
+                      <IconEdit size={14} />
+                    </ActionIcon>
+                    <ActionIcon
+                      variant="light"
+                      color="red"
+                      onClick={() => handleDeleteHabit(habit.id)}
+                    >
+                      <IconTrash size={14} />
+                    </ActionIcon>
+                  </Group>
+                </Flex>
               </Card.Section>
             </Card>
           ))}

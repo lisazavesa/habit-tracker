@@ -8,13 +8,35 @@ interface AuthState {
   token: string | null;
   loading: boolean;
   error: string | null;
+  isHydrated: boolean;
 }
 
+// Load token from localStorage or cookies
+const getInitialToken = (): string | null => {
+  const storedToken = localStorage.getItem("access_token");
+  if (storedToken) return storedToken;
+  return Cookies.get("access_token") || null;
+};
+
+// Load user from localStorage
+const getInitialUser = (): User | null => {
+  const storedUser = localStorage.getItem("user");
+  if (storedUser) {
+    try {
+      return JSON.parse(storedUser);
+    } catch {
+      return null;
+    }
+  }
+  return null;
+};
+
 const initialState: AuthState = {
-  user: null,
-  token: Cookies.get("access_token") || null,
+  user: getInitialUser(),
+  token: getInitialToken(),
   loading: false,
   error: null,
+  isHydrated: true, // Mark as hydrated since we load from localStorage
 };
 
 export const login = createAsyncThunk(
@@ -73,10 +95,20 @@ const authSlice = createSlice({
       state.user = null;
       state.token = null;
       state.error = null;
+      state.isHydrated = false;
       Cookies.remove("access_token");
+      localStorage.removeItem("access_token");
     },
     clearError: (state) => {
       state.error = null;
+    },
+    hydrateAuth: (
+      state,
+      action: PayloadAction<{ user: User; token: string }>,
+    ) => {
+      state.user = action.payload.user;
+      state.token = action.payload.token;
+      state.isHydrated = true;
     },
   },
   extraReducers: (builder) => {
@@ -135,5 +167,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, clearError } = authSlice.actions;
+export const { logout, clearError, hydrateAuth } = authSlice.actions;
 export default authSlice.reducer;

@@ -93,10 +93,12 @@ export const AuthPage = () => {
     >
       <Container size={420} my={40}>
         <Center mb="lg">
-          <Title order={1}>Habit Tracker</Title>
+          <Title order={1} c="white">
+            Habit Tracker
+          </Title>
         </Center>
 
-        <Paper radius="md" p="xl" withBorder>
+        <Paper radius="md" p="xl" miw={{ base: 300, sm: 400 }} withBorder>
           <Tabs value={activeTab} onChange={setActiveTab}>
             <Tabs.List grow>
               <Tabs.Tab value="login">Вход</Tabs.Tab>
@@ -146,12 +148,7 @@ export const AuthPage = () => {
                     disabled={loading}
                   />
 
-                  <Button
-                    fullWidth
-                    type="submit"
-                    loading={loading}
-                    disabled={!loginData.email || !loginData.password}
-                  >
+                  <Button fullWidth type="submit" loading={loading}>
                     Войти
                   </Button>
                 </Stack>
@@ -215,16 +212,7 @@ export const AuthPage = () => {
                     disabled={loading}
                   />
 
-                  <Button
-                    fullWidth
-                    type="submit"
-                    loading={loading}
-                    disabled={
-                      !registerData.email ||
-                      !registerData.password ||
-                      registerData.password !== registerData.confirmPassword
-                    }
-                  >
+                  <Button fullWidth type="submit" loading={loading}>
                     Зарегистрироваться
                   </Button>
                 </Stack>
