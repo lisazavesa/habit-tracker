@@ -113,4 +113,20 @@ export class HabitsController {
     const logs = await this.logsService.getByHabitId(habitId, from, to);
     return logs;
   }
+
+  @Delete(':id/logs/:logId')
+  async deleteHabitLog(
+    @Request() req,
+    @Param('id', ParseIntPipe) habitId: number,
+    @Param('logId', ParseIntPipe) logId: number,
+  ): Promise<void> {
+    const userId = req.user.userId;
+    const habit = await this.habitsService.findById(habitId, userId);
+
+    if (!habit) {
+      throw new Error('habit not found');
+    }
+
+    await this.logsService.delete(logId, habitId);
+  }
 }

@@ -99,10 +99,12 @@ export const upsertHabitLog = createAsyncThunk(
   "habits/upsertHabitLog",
   async (
     { habitId, data }: { habitId: number; data: UpsertHabitLogRequest },
-    { rejectWithValue },
+    { rejectWithValue, dispatch },
   ) => {
     try {
       const response = await habitsApi.upsertLog(habitId, data);
+      // Re-fetch all logs to ensure state is in sync with DB
+      dispatch(fetchHabitLogs(habitId));
       return { habitId, log: response.data };
     } catch (error: any) {
       return rejectWithValue(
@@ -116,10 +118,12 @@ export const deleteHabitLog = createAsyncThunk(
   "habits/deleteHabitLog",
   async (
     { habitId, logId }: { habitId: number; logId: number },
-    { rejectWithValue },
+    { rejectWithValue, dispatch },
   ) => {
     try {
       await habitsApi.deleteLog(habitId, logId);
+      // Re-fetch all logs to ensure state is in sync with DB
+      dispatch(fetchHabitLogs(habitId));
       return { habitId, logId };
     } catch (error: any) {
       return rejectWithValue(

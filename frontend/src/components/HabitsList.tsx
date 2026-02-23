@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Container,
   Card,
@@ -12,6 +12,8 @@ import {
   Loader,
   Modal,
 } from "@mantine/core";
+import { DatePickerInput } from "@mantine/dates";
+import "dayjs/locale/ru";
 import {
   IconEdit,
   IconTrash,
@@ -22,9 +24,16 @@ import {
 import { useAppDispatch, useAppSelector } from "@/hooks/redux";
 import { fetchHabits, deleteHabit, upsertHabitLog } from "@/store/habitsSlice";
 import { Habit } from "@/types";
-import { useState } from "react";
 import { useDisclosure } from "@mantine/hooks";
 import { HabitLogsModal } from "./HabitLogsModal";
+
+// Format date to YYYY-MM-DD in local timezone (not UTC)
+function formatDateToLocal(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
 
 export const HabitsList = ({
   onEditHabit,
@@ -36,6 +45,7 @@ export const HabitsList = ({
   const dispatch = useAppDispatch();
   const { habits, loading } = useAppSelector((state) => state.habits);
   const [selectedHabit, setSelectedHabit] = useState<Habit | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
   const [opened, { open, close }] = useDisclosure(false);
   const [logsOpened, { open: openLogs, close: closeLogs }] =
     useDisclosure(false);
@@ -44,7 +54,7 @@ export const HabitsList = ({
     dispatch(fetchHabits());
   }, [dispatch]);
 
-  const handleDeleteHabit = (id: string) => {
+  const handleDeleteHabit = (id: number) => {
     if (window.confirm("Вы уверены?")) {
       dispatch(deleteHabit(id));
     }
@@ -116,6 +126,7 @@ export const HabitsList = ({
                   variant="light"
                   onClick={() => {
                     setSelectedHabit(habit);
+                    setSelectedDate(new Date());
                     open();
                   }}
                   fullWidth
@@ -159,17 +170,29 @@ export const HabitsList = ({
         {selectedHabit && (
           <Stack gap="md">
             <Text fw={700}>{selectedHabit.title}</Text>
+            <DatePickerInput
+              label="Дата"
+              placeholder="Выберите дату"
+              value={selectedDate}
+              onChange={setSelectedDate}
+              locale="ru"
+              valueFormat="DD.MM.YYYY"
+              maxDate={new Date()}
+              clearable={false}
+            />
             <Group grow>
               <Button
                 variant="light"
                 color="green"
+                disabled={!selectedDate}
                 onClick={() => {
-                  const today = new Date().toISOString().split("T")[0];
+                  if (!selectedDate) return;
+                  const dateStr = formatDateToLocal(selectedDate);
                   dispatch(
                     upsertHabitLog({
                       habitId: selectedHabit.id,
                       data: {
-                        date: today,
+                        date: dateStr,
                         status: "done",
                       },
                     }),
@@ -182,13 +205,15 @@ export const HabitsList = ({
               <Button
                 variant="light"
                 color="red"
+                disabled={!selectedDate}
                 onClick={() => {
-                  const today = new Date().toISOString().split("T")[0];
+                  if (!selectedDate) return;
+                  const dateStr = formatDateToLocal(selectedDate);
                   dispatch(
                     upsertHabitLog({
                       habitId: selectedHabit.id,
                       data: {
-                        date: today,
+                        date: dateStr,
                         status: "missed",
                       },
                     }),
